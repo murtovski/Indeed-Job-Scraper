@@ -16,9 +16,15 @@ def filter_information(doc):
         title = item.find('h2').text
         company = item.find('text', class_='company-title-name').text.strip()
         location = item.find('dd', class_='fa-map-marker').text.strip()
-        print(title, company, location)
-    return len(titles)
+        full_job = {
+            'Title': title, 
+            'Company': company,
+            'Location': location
+        }
+        list.append(full_job)
+    return
 
-
+list = []
 info = extract(0)
 filter_information(info)
+print(list)
