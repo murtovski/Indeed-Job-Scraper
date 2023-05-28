@@ -12,8 +12,13 @@ def extract(page):
 
 def filter_information(doc):
     titles = doc.find_all('div', class_='job-details-header')
+    for item in titles:
+        title = item.find('h2').text
+        company = item.find('text', class_='company-title-name').text.strip()
+        location = item.find('dd', class_='fa-map-marker').text.strip()
+        print(title, company, location)
     return len(titles)
 
 
 info = extract(0)
-print(filter_information(info))
+filter_information(info)
