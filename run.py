@@ -9,5 +9,13 @@ def extract(page):
     return doc
 
 
+def filter_information(doc):
+    titles = doc.find_all('div', class_='jobTitle')
+    for item in titles:
+        title = item.find('a').text
+        print(title)
+    return
+
+
 info = extract(0)
-print(info.prettify())
+filter_information(info)
