@@ -1,12 +1,19 @@
 import requests
 from bs4 import BeautifulSoup
 
+list = []
+
+
 def get_role(role):
-    
-    role = role.replace(" ", "+")
+    if not role.isdigit():
+        role = role.strip()
+        role = role.replace(" ", "+")
+    else:
+        print("Jobs can not be numbers.")
+    return role
+        
 
-
-def extract(page):
+def extract(page, role):
     url = f'https://www.jobs.ie/Jobs.aspx?hd_searchbutton=true&Keywords={role}&Regions=0&Categories=0&job-search=true'
     header = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"}
     result = requests.get(url, header)
@@ -30,10 +37,9 @@ def filter_information(doc):
 
 
 def main():
-    role = input("Please enter the role in which you would like to search. ")
-    get_role(role)
-    list = []
-    info = extract(0)
+    entry = input("Please enter the role in which you would like to search. ")
+    role = get_role(entry)
+    info = extract(0, role)
     filter_information(info)
     for item in list:
         print(item)
