@@ -2,6 +2,9 @@ import gspread
 from google.oauth2.service_account import Credentials
 import requests
 from bs4 import BeautifulSoup
+from datetime import date
+import string
+
 
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -9,7 +12,7 @@ SCOPE = [
     "https://www.googleapis.com/auth/drive"
     ]
 
-
+ALPHABET = string.ascii_uppercase
 CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
@@ -51,8 +54,19 @@ def filter_information(doc):
     return
 
 
-def format_jobs():
+def format_jobs(entry):
+    worksheet = sheet.get_worksheet(0)
+    values = worksheet.get_all_values()
+    next_row = len(values) + 1
+    today = date.today()
+    worksheet.update(f'A{next_row}', today)
+    worksheet.update(f'B{next_row}', f'Search: {entry}')
     for item in list:
+        full_string = f"Title: {item['Title']} \n Company: {item['Company']} \n Location: {item['Location']}"
+        for i, value in enumerate(full_string):
+            cell_range = f"{ALPHABET[i]}{next_row}"
+            worksheet.update(cell_range, value)
+        # worksheet.update(f'A{next_row}:C{next_row}', [full_string])
         print(f"Title: {item['Title']}")
         print(f"Company: {item['Company']}")
         print(f"Location: {item['Location']}")
@@ -64,9 +78,7 @@ def main():
     role = get_role(entry)
     info = extract(0, role)
     filter_information(info)
-    # for item in list:
-    #     print(item)
-    format_jobs()
+    format_jobs(entry)
     
 
 main()
