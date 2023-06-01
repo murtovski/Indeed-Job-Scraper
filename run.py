@@ -1,7 +1,10 @@
+import gspread
 import requests
 from bs4 import BeautifulSoup
 
 list = []
+sa = gspread.creds("creds.json")
+sh = sa.open("Jobs-Scraper")
 
 
 def get_role(role):
