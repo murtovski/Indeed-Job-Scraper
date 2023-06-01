@@ -1,10 +1,22 @@
 import gspread
+from google.oauth2.service_account import Credentials
 import requests
 from bs4 import BeautifulSoup
 
+SCOPE = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive"
+    ]
+
+
+CREDS = Credentials.from_service_account_file('creds.json')
+SCOPED_CREDS = CREDS.with_scopes(SCOPE)
+GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
+sheet = GSPREAD_CLIENT.open('Jobs-Scraper')
+
+
 list = []
-sa = gspread.creds("creds.json")
-sh = sa.open("Jobs-Scraper")
 
 
 def get_role(role):
@@ -39,13 +51,22 @@ def filter_information(doc):
     return
 
 
+def format_jobs():
+    for item in list:
+        print(f"Title: {item['Title']}")
+        print(f"Company: {item['Company']}")
+        print(f"Location: {item['Location']}")
+        print()
+
+
 def main():
     entry = input("Please enter the role in which you would like to search. ")
     role = get_role(entry)
     info = extract(0, role)
     filter_information(info)
-    for item in list:
-        print(item)
-        
+    # for item in list:
+    #     print(item)
+    format_jobs()
     
+
 main()
