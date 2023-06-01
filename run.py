@@ -17,9 +17,7 @@ CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 sheet = GSPREAD_CLIENT.open('Jobs-Scraper')
-
-
-list = []
+job_list = []
 
 
 def get_role(role):
@@ -50,28 +48,33 @@ def filter_information(doc):
             'Company': company,
             'Location': location
         }
-        list.append(full_job)
+        job_list.append(full_job)
     return
 
 
 def format_jobs(entry):
-    worksheet = sheet.get_worksheet(0)
-    values = worksheet.get_all_values()
-    next_row = len(values) + 1
-    today = date.today()
+    worksheet = sheet.worksheet('Sheet1')
+    #values = worksheet.get_all_values()
+    next_row = 1
+    next_col = 2
+    today = date.today().isoformat()
     worksheet.update(f'A{next_row}', today)
     worksheet.update(f'B{next_row}', f'Search: {entry}')
-    for item in list:
-        full_string = f"Title: {item['Title']} \n Company: {item['Company']} \n Location: {item['Location']}"
-        for i, value in enumerate(full_string):
-            cell_range = f"{ALPHABET[i]}{next_row}"
-            worksheet.update(cell_range, value)
-        # worksheet.update(f'A{next_row}:C{next_row}', [full_string])
-        print(f"Title: {item['Title']}")
-        print(f"Company: {item['Company']}")
-        print(f"Location: {item['Location']}")
+    
+    for item in job_list:  # Updated loop variable to 'item'
+        full_string = f"Title: {item['Title']}\nCompany: {item['Company']}\nLocation: {item['Location']}"
+        div, mod = divmod(next_col, len(ALPHABET))  # Updated 'i' to 'next_row'
+        column = ALPHABET[div - 1] + ALPHABET[mod] if div > 0 else ALPHABET[mod]
+        cell_range = f"{column}{next_row}"
+        worksheet.update(cell_range, full_string)
+        next_col += 1
+        print(full_string)
         print()
-
+        
+    next_row += 1
+        
+# def update_sheet():
+    
 
 def main():
     entry = input("Please enter the role in which you would like to search. ")
