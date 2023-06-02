@@ -17,6 +17,7 @@ CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 sheet = GSPREAD_CLIENT.open('Jobs-Scraper')
+MAX_CALLS = 60
 job_list = []
 
 
@@ -52,16 +53,22 @@ def filter_information(doc):
     return
 
 
-def format_jobs(entry):
+def check_next_empty(worksheet):
+    values_list = worksheet.col_values(1)
+    next_row = len(values_list) + 1
+    print(next_row)
+    return next_row
+        
+
+def update_sheet(entry):
     worksheet = sheet.worksheet('Sheet1')
-    #values = worksheet.get_all_values()
-    next_row = 1
+    next_row = check_next_empty(worksheet)
     next_col = 2
     today = date.today().isoformat()
     worksheet.update(f'A{next_row}', today)
     worksheet.update(f'B{next_row}', f'Search: {entry}')
-    
-    for item in job_list:  # Updated loop variable to 'item'
+    for item in job_list:
+        index = 0
         full_string = f"Title: {item['Title']}\nCompany: {item['Company']}\nLocation: {item['Location']}"
         div, mod = divmod(next_col, len(ALPHABET))  # Updated 'i' to 'next_row'
         column = ALPHABET[div - 1] + ALPHABET[mod] if div > 0 else ALPHABET[mod]
@@ -70,18 +77,17 @@ def format_jobs(entry):
         next_col += 1
         print(full_string)
         print()
+        index += 1
+        if index >= 55:
+            break
         
-    next_row += 1
-        
-# def update_sheet():
     
-
 def main():
     entry = input("Please enter the role in which you would like to search. ")
     role = get_role(entry)
     info = extract(0, role)
     filter_information(info)
-    format_jobs(entry)
+    update_sheet(entry)
     
 
 main()
