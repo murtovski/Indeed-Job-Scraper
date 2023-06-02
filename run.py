@@ -44,11 +44,7 @@ def filter_information(doc):
         title = item.find('h2').text
         company = item.find('text', class_='company-title-name').text.strip()
         location = item.find('dd', class_='fa-map-marker').text.strip()
-        full_job = {
-            'Title': title, 
-            'Company': company,
-            'Location': location
-        }
+        full_job = f"Title: {title}\nCompany: {company}\nLocation: {location}"
         job_list.append(full_job)
     return
 
@@ -60,26 +56,37 @@ def check_next_empty(worksheet):
     return next_row
         
 
-def update_sheet(entry):
+def update_sheet(entry, job_list):
     worksheet = sheet.worksheet('Sheet1')
     next_row = check_next_empty(worksheet)
-    next_col = 2
     today = date.today().isoformat()
     worksheet.update(f'A{next_row}', today)
     worksheet.update(f'B{next_row}', f'Search: {entry}')
-    for item in job_list:
-        index = 0
-        full_string = f"Title: {item['Title']}\nCompany: {item['Company']}\nLocation: {item['Location']}"
-        div, mod = divmod(next_col, len(ALPHABET))  # Updated 'i' to 'next_row'
-        column = ALPHABET[div - 1] + ALPHABET[mod] if div > 0 else ALPHABET[mod]
-        cell_range = f"{column}{next_row}"
-        worksheet.update(cell_range, full_string)
-        next_col += 1
-        print(full_string)
-        print()
-        index += 1
-        if index >= 55:
-            break
+
+    num_columns = len(job_list) + 2
+    last_col = ALPHABET[num_columns - 1] if num_columns <= len(ALPHABET) else ALPHABET[-1] * (num_columns // len(ALPHABET)) + ALPHABET[(num_columns % len(ALPHABET)) - 1]
+    worksheet.update(f'C{next_row}:{last_col}{next_row}', [[str(el) for el in job_list]])
+
+    print(job_list)
+
+
+
+
+
+    
+    # for item in job_list:
+    #     index = 0
+    #     full_string = f"Title: {item['Title']}\nCompany: {item['Company']}\nLocation: {item['Location']}"
+    #     div, mod = divmod(next_col, len(ALPHABET))  # Updated 'i' to 'next_row'
+    #     column = ALPHABET[div - 1] + ALPHABET[mod] if div > 0 else ALPHABET[mod]
+    #     cell_range = f"{column}{next_row}"
+    #     worksheet.update(cell_range, full_string)
+    #     next_col += 1
+    #     print(full_string)
+    #     print()
+    #     index += 1
+    #     if index >= 55:
+    #         break
         
     
 def main():
@@ -87,7 +94,7 @@ def main():
     role = get_role(entry)
     info = extract(0, role)
     filter_information(info)
-    update_sheet(entry)
+    update_sheet(entry, job_list)
     
 
 main()
